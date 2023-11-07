@@ -27,6 +27,7 @@ async function run() {
 
     const foodCollection = client.db("moonstarDB").collection("foods");
     const userCollection = client.db("userDB").collection("users");
+    const addedFoodCollection = client.db("foodDB").collection("allFoods");
 
 
 // Food items
@@ -48,6 +49,23 @@ async function run() {
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
       const result = await userCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+    //Add A food item
+    app.post("/newFood", async (req, res) => {
+      const userInfo = req.body;
+      const result = await addedFoodCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+    app.get("/newFood", async (req, res) => {
+      let query = {};
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const cursor = addedFoodCollection.find(query);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
