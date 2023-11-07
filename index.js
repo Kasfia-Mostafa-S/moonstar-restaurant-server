@@ -28,6 +28,7 @@ async function run() {
     const foodCollection = client.db("moonstarDB").collection("foods");
     const userCollection = client.db("userDB").collection("users");
     const addedFoodCollection = client.db("foodDB").collection("allFoods");
+    const orderCollection = client.db("OrderDB").collection("orders");
 
 
 // Food items
@@ -54,8 +55,8 @@ async function run() {
 
     //Add A food item
     app.post("/newFood", async (req, res) => {
-      const userInfo = req.body;
-      const result = await addedFoodCollection.insertOne(userInfo);
+      const foodInfo = req.body;
+      const result = await addedFoodCollection.insertOne(foodInfo);
       res.send(result);
     });
 
@@ -83,6 +84,19 @@ async function run() {
       };
       const result = await addedFoodCollection.updateOne(filter,products,options)
       res.send(result)
+    });
+
+    // Order food
+    app.post("/orderFood", async (req, res) => {
+      const orderInfo = req.body;
+      const result = await orderCollection.insertOne(orderInfo);
+      res.send(result);
+    });
+
+    app.get("/orderFood", async (req, res) => {
+      const cursor = orderCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
