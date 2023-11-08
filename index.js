@@ -45,6 +45,11 @@ async function run() {
       res.send(result);
     });
     
+    app.post("/foods", async (req, res) => {
+      const newFoodInfo = req.body;
+      const result = await foodCollection.insertOne(newFoodInfo);
+      res.send(result);
+    });
 
     // user information
     app.post("/users", async (req, res) => {
