@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,7 +14,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ijwgr8d.mongodb.net/?retryWrites=true&w=majority`;
@@ -29,24 +29,24 @@ const client = new MongoClient(uri, {
 });
 
 // middlewares
-const logger = (req,res,next)=>{
-  console.log("log information", req.method,req.url)
-  next()
-}
+const logger = (req, res, next) => {
+  console.log("log information", req.method, req.url);
+  next();
+};
 
-const verifyToken = (req,res,next)=>{
+const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  if(!token){
-return res.status(401).send({massage: 'unauthorized access'})
+  if (!token) {
+    return res.status(401).send({ massage: "unauthorized access" });
   }
-  jwt.verify(token, process.env.ACCESS_TOKEN,(error,decode)=>{
-    if(error){
-      return res.status(401).send({massage: 'unauthorized access'})
+  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
+    if (error) {
+      return res.status(401).send({ massage: "unauthorized access" });
     }
-    req.user = decode
-    next()
-  })
-}
+    req.user = decode;
+    next();
+  });
+};
 
 async function run() {
   try {
@@ -59,7 +59,7 @@ async function run() {
     const orderCollection = client.db("OrderDB").collection("orders");
 
     // auth related api
-    app.post("/jwt",logger,verifyToken, async (req, res) => {
+    app.post("/jwt", logger, verifyToken, async (req, res) => {
       const user = req.body;
       console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
@@ -88,9 +88,19 @@ async function run() {
 
     // Food items
     app.get("/foods", async (req, res) => {
+      const page = parseInt(req.query.page)
+      const size = parseInt(req.query.size)
       const cursor = foodCollection.find();
-      const result = await cursor.toArray();
+      const result = await cursor
+      .skip(page * size)
+      .limit(size)
+      .toArray();
       res.send(result);
+    });
+
+    app.get("/foodCount", async (req, res) => {
+      const count = await foodCollection.estimatedDocumentCount();
+      res.send({ count });
     });
 
     app.get("/foods/:id", async (req, res) => {
@@ -120,10 +130,10 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/newFood", logger,verifyToken, async (req, res) => {
-      console.log('token owner info',req.user)
-      if(req.user.email !== req.query.email){
-        return res.status(403).send({massage: 'Forbidden access'})
+    app.get("/newFood", logger, verifyToken, async (req, res) => {
+      console.log("token owner info", req.user);
+      if (req.user.email !== req.query.email) {
+        return res.status(403).send({ massage: "Forbidden access" });
       }
       let query = {};
       if (req.query?.email) {
