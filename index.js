@@ -10,10 +10,11 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      'https://moonstar-restaurant.web.app','https://moonstar-restaurant.firebaseapp.com'
-  ],
+      // "http://localhost:5173",
+      // "http://localhost:5174",
+      "https://moonstar-restaurant.web.app/",
+      "https://moonstar-restaurant.firebaseapp.com/",
+    ],
     credentials: true,
   })
 );
@@ -55,7 +56,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const foodCollection = client.db("moonstarDB").collection("foods");
     const userCollection = client.db("userDB").collection("users");
@@ -92,13 +93,13 @@ async function run() {
 
     // Food items
     app.get("/foods", async (req, res) => {
-      const page = parseInt(req.query.page)
-      const size = parseInt(req.query.size)
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       const cursor = foodCollection.find();
       const result = await cursor
-      .skip(page * size)
-      .limit(size)
-      .toArray();
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
 
@@ -117,6 +118,23 @@ async function run() {
     app.post("/foods", async (req, res) => {
       const newFoodInfo = req.body;
       const result = await foodCollection.insertOne(newFoodInfo);
+      res.send(result);
+    });
+
+    // count
+    app.put("/foods/:id", async (req, res) => {
+      const body = req.body;
+      const id = req.params.id;
+      const Count = body.Count;
+      const newCount = parseInt(Count);
+      const options = { upsert: true };
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $inc: {
+          Count: 1,
+        },
+      };
+      const result = await foodCollection.updateOne(query, update, options);
       res.send(result);
     });
 
@@ -180,23 +198,6 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-
-    // count
-    app.put('/orderFood/:id', async (req, res) => {
-      const body = req.body;
-      const id = req.params.id;
-      const Count = body.Count;
-      const newCount = parseInt(Count)
-      const options = { upsert: true };
-      const query = { _id: new ObjectId(id) };
-      const update = {
-          $inc: {
-              Count: 1
-          }
-      };
-      const result = await orderCollection.updateOne(query, update, options);
-      res.send(result);
-  });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
