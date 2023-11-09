@@ -9,7 +9,11 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      'https://moonstar-restaurant.web.app','https://moonstar-restaurant.firebaseapp.com'
+  ],
     credentials: true,
   })
 );
@@ -59,7 +63,7 @@ async function run() {
     const orderCollection = client.db("OrderDB").collection("orders");
 
     // auth related api
-    app.post("/jwt", logger, verifyToken, async (req, res) => {
+    app.post("/jwt", async (req, res) => {
       const user = req.body;
       console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
@@ -176,6 +180,23 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // count
+    app.put('/orderFood/:id', async (req, res) => {
+      const body = req.body;
+      const id = req.params.id;
+      const Count = body.Count;
+      const newCount = parseInt(Count)
+      const options = { upsert: true };
+      const query = { _id: new ObjectId(id) };
+      const update = {
+          $inc: {
+              Count: 1
+          }
+      };
+      const result = await orderCollection.updateOne(query, update, options);
+      res.send(result);
+  });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
