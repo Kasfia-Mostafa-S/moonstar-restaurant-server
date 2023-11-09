@@ -12,8 +12,9 @@ app.use(
     origin: [
       // "http://localhost:5173",
       // "http://localhost:5174",
-      "https://moonstar-restaurant.web.app/",
-      "https://moonstar-restaurant.firebaseapp.com/",
+     'https://moonstar-restaurant-server.vercel.app',
+      "https://moonstar-restaurant.web.app",
+      "https://moonstar-restaurant.firebaseapp.com",
     ],
     credentials: true,
   })
@@ -56,7 +57,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const foodCollection = client.db("moonstarDB").collection("foods");
     const userCollection = client.db("userDB").collection("users");
@@ -122,7 +123,7 @@ async function run() {
     });
 
     // count
-    app.put("/foods/:id", async (req, res) => {
+    app.put("/showFoods/:id", async (req, res) => {
       const body = req.body;
       const id = req.params.id;
       const Count = body.Count;
