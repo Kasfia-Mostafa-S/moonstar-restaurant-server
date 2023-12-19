@@ -53,6 +53,19 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+// const verifyToken = (req, res, next) => {
+//   const token = req?.cookies?.token;
+//   if (!token) {
+//     return res.status(401).send({ massage: "unauthorized access" });
+//   }
+//   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
+//     if (error) {
+//       return res.status(401).send({ massage: "unauthorized access" });
+//     }
+//     req.user = decode;
+//     next();
+//   });
+// };
 
 async function run() {
   try {
